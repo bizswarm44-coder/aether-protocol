@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aether-protocol"
+version = "1.0.0"
+description = "AETHER — a lightweight, signed protocol for agent-to-agent discovery, negotiation, task exchange, and settlement."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [{ name = "AETHER Protocol" }]
+keywords = ["ai-agents", "protocol", "payments", "settlement", "cryptography"]
+dependencies = ["cryptography>=3.4"]
+
+[project.urls]
+Homepage = "https://github.com/aether-protocol/aether"
+
+[tool.setuptools]
+packages = ["aether"]

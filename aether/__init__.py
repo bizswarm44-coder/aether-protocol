@@ -33,6 +33,8 @@ from .settlement import (
     EscrowSettlement,
     PhasedSettlement,
 )
+from .registry_store import ManifestStore
+from .registry_client import RegistryClient, RegistryError
 
 __version__ = PROTOCOL_VERSION
 
@@ -54,5 +56,8 @@ __all__ = [
     "ImmediatePayment",
     "EscrowSettlement",
     "PhasedSettlement",
+    "ManifestStore",
+    "RegistryClient",
+    "RegistryError",
     "__version__",
 ]

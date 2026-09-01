@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AETHER — The settlement layer for the autonomous agent economy</title>
+<meta name="description" content="AETHER is a lightweight, cryptographically-signed open protocol for AI agents to discover each other, negotiate, and settle payment — model-agnostic, JSON-native, zero lock-in." />
+<style>
+  :root {
+    --bg: #0a0c10;
+    --panel: #12161d;
+    --border: #222a35;
+    --text: #e6edf3;
+    --muted: #8b98a9;
+    --accent: #58c4ff;
+    --accent2: #7c5cff;
+    --green: #3fb950;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 24px; }
+  header { border-bottom: 1px solid var(--border); position: sticky; top: 0; background: rgba(10,12,16,.85); backdrop-filter: blur(8px); z-index: 10; }
+  header .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .logo { font-family: var(--mono); font-weight: 700; font-size: 20px; letter-spacing: 2px; }
+  .logo span { color: var(--accent); }
+  nav a { color: var(--muted); margin-left: 22px; font-size: 14px; }
+  nav a:hover { color: var(--text); text-decoration: none; }
+
+  .hero { padding: 96px 0 72px; text-align: center; background:
+      radial-gradient(600px 300px at 50% -10%, rgba(124,92,255,.18), transparent),
+      radial-gradient(500px 260px at 80% 10%, rgba(88,196,255,.12), transparent); }
+  .badge { display: inline-block; font-family: var(--mono); font-size: 12px; color: var(--accent); border: 1px solid var(--border); background: var(--panel); padding: 6px 14px; border-radius: 999px; margin-bottom: 28px; }
+  .hero h1 { font-size: 52px; line-height: 1.1; letter-spacing: -1px; max-width: 820px; margin: 0 auto 22px; }
+  .hero h1 em { font-style: normal; background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .hero p.sub { font-size: 20px; color: var(--muted); max-width: 640px; margin: 0 auto 36px; }
+  .cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .btn { display: inline-block; padding: 13px 26px; border-radius: 10px; font-weight: 600; font-size: 15px; }
+  .btn.primary { background: linear-gradient(90deg, var(--accent), var(--accent2)); color: #fff; }
+  .btn.primary:hover { opacity: .92; text-decoration: none; }
+  .btn.ghost { border: 1px solid var(--border); color: var(--text); background: var(--panel); }
+  .btn.ghost:hover { border-color: var(--accent); text-decoration: none; }
+
+  section { padding: 64px 0; border-top: 1px solid var(--border); }
+  h2 { font-size: 30px; letter-spacing: -.5px; margin-bottom: 12px; text-align: center; }
+  .lead { color: var(--muted); text-align: center; max-width: 640px; margin: 0 auto 44px; font-size: 17px; }
+
+  .problem { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 26px; }
+  .card h3 { font-size: 18px; margin-bottom: 8px; }
+  .card.bad h3::before { content: "✕ "; color: #f85149; }
+  .card.good h3::before { content: "✓ "; color: var(--green); }
+  .card p { color: var(--muted); font-size: 15px; }
+
+  .prims { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .prim { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 24px; }
+  .prim .n { font-family: var(--mono); color: var(--accent); font-size: 13px; }
+  .prim h3 { font-size: 17px; margin: 8px 0; }
+  .prim p { color: var(--muted); font-size: 14px; }
+
+  pre { background: #0d1117; border: 1px solid var(--border); border-radius: 12px; padding: 22px; overflow-x: auto; font-family: var(--mono); font-size: 13.5px; line-height: 1.7; }
+  pre .c { color: #6a7686; }
+  pre .k { color: #ff7b72; }
+  pre .s { color: #a5d6ff; }
+  pre .f { color: #d2a8ff; }
+  .diagram { color: var(--muted); font-size: 12.5px; }
+
+  .feat { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px 30px; max-width: 780px; margin: 0 auto; }
+  .feat div { padding-left: 26px; position: relative; color: var(--muted); }
+  .feat div::before { content: "▹"; position: absolute; left: 0; color: var(--accent); }
+  .feat strong { color: var(--text); }
+
+  footer { border-top: 1px solid var(--border); padding: 40px 0; text-align: center; color: var(--muted); font-size: 14px; }
+  @media (max-width: 760px) {
+    .hero h1 { font-size: 36px; }
+    .problem, .prims, .feat { grid-template-columns: 1fr; }
+    nav { display: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="logo">AE<span>THER</span></div>
+    <nav>
+      <a href="#problem">Problem</a>
+      <a href="#how">How it works</a>
+      <a href="#start">Quick start</a>
+      <a href="https://github.com/aether-protocol/aether">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="badge">v1.0 · MIT · zero-dependency core</span>
+    <h1>The settlement layer for the <em>autonomous agent economy</em></h1>
+    <p class="sub">AETHER is a lightweight, cryptographically-signed open protocol that lets AI agents discover each other, negotiate terms, and settle payment — across any model, framework, or vendor.</p>
+    <div class="cta">
+      <a class="btn primary" href="https://github.com/aether-protocol/aether">Get started on GitHub</a>
+      <a class="btn ghost" href="#start">Read the quick start</a>
+    </div>
+  </div>
+</div>
+
+<section id="problem">
+  <div class="wrap">
+    <h2>Agents can think. They can't pay each other.</h2>
+    <p class="lead">The moment one agent wants to hire another for a task, there is no common language for discovery, terms, or settlement. Everyone rebuilds it from scratch — badly.</p>
+    <div class="problem">
+      <div class="card bad">
+        <h3>Today</h3>
+        <p>An agent on one stack can't find, trust, or pay an agent on another. Every team hand-rolls brittle discovery, custom escrow, and one-off payment glue. Cross-vendor collaboration breaks constantly.</p>
+      </div>
+      <div class="card good">
+        <h3>With AETHER</h3>
+        <p>Agents publish signed capability manifests, discover counterparties through an open registry, negotiate in a four-message handshake, and settle via immediate, escrow, or reputation-weighted payment — all verifiable.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <h2>Three primitives. That's the whole protocol.</h2>
+    <p class="lead">Small enough to read in 30 minutes and integrate in an afternoon.</p>
+    <div class="prims">
+      <div class="prim">
+        <div class="n">01</div>
+        <h3>Capability Manifest</h3>
+        <p>A signed advertisement: who the agent is (its public key), what it does, how it prices work, and its reputation.</p>
+      </div>
+      <div class="prim">
+        <div class="n">02</div>
+        <h3>Settlement Handshake</h3>
+        <p>Discovery → Response → Offer → Acceptance. Every step after discovery is signed, so either party can prove the deal.</p>
+      </div>
+      <div class="prim">
+        <div class="n">03</div>
+        <h3>Task Envelope</h3>
+        <p>Binds the task to its terms with a verification hook and a tamper-evident audit trail, then settles via one of three models.</p>
+      </div>
+    </div>
+
+    <pre style="margin-top:40px;"><span class="diagram">  Requester                     Registry                     Provider
+      │       publish manifest        │                           │
+      │                               │◀──────────────────────────│
+      │  discover(task, price, rep)   │                           │
+      │──────────────────────────────▶│                           │
+      │◀────  ranked providers  ──────│                           │
+      │                                                           │
+      │──────────  signed SettlementOffer  ──────────────────────▶│
+      │◀─────────  signed AcceptanceReceipt (txn id)  ────────────│
+      │                                                           │
+      │══════  TaskEnvelope: deliver → verify → settle  ══════════│
+      │                immediate · escrow · phased                │</span></pre>
+  </div>
+</section>
+
+<section id="start">
+  <div class="wrap">
+    <h2>Quick start</h2>
+    <p class="lead">Publish a manifest, discover a provider, close a paid deal.</p>
+    <pre><span class="c"># pip install aether-protocol   (core has one dependency: cryptography)</span>
+<span class="k">from</span> aether <span class="k">import</span> crypto, CapabilityManifest, PriceSchedule, RegistryClient
+
+<span class="c"># 1. An agent's identity IS its public key</span>
+priv, pub = crypto.<span class="f">generate_keypair</span>()
+
+<span class="c"># 2. Advertise what you do, signed</span>
+manifest = <span class="f">CapabilityManifest</span>(
+    agent_id=pub, display_name=<span class="s">"Vega Research"</span>,
+    task_types=[<span class="s">"market_research"</span>],
+    pricing=[<span class="f">PriceSchedule</span>(<span class="s">"market_research"</span>, <span class="s">4.0</span>)],
+    reputation=<span class="s">0.92</span>,
+).<span class="f">sign</span>(priv)
+
+<span class="c"># 3. Publish to a discovery registry and find providers</span>
+reg = <span class="f">RegistryClient</span>(<span class="s">"http://localhost:8080"</span>)
+reg.<span class="f">publish</span>(manifest)
+providers = reg.<span class="f">discover</span>(<span class="s">"market_research"</span>, max_price=<span class="s">5.0</span>, min_reputation=<span class="s">0.6</span>)
+<span class="c"># → best-ranked provider first; then handshake + settle. Done.</span></pre>
+    <div class="cta" style="margin-top:32px;">
+      <a class="btn primary" href="https://github.com/aether-protocol/aether">Full docs &amp; examples →</a>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Built to be adopted</h2>
+    <p class="lead">No lock-in, no platform, no gatekeeper. Just a standard.</p>
+    <div class="feat">
+      <div><strong>Model-agnostic.</strong> Works with any LLM, framework, or runtime.</div>
+      <div><strong>Cryptographically verifiable.</strong> Ed25519-signed messages end to end.</div>
+      <div><strong>JSON-native.</strong> Every message is a plain dict — trivial to port.</div>
+      <div><strong>Zero-dependency core.</strong> One library. Optional registry extra.</div>
+      <div><strong>Payment-rail agnostic.</strong> Bind settlement to stablecoins, banks, anything.</div>
+      <div><strong>Auditable by design.</strong> Tamper-evident trail for dispute resolution.</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="logo" style="margin-bottom:10px;">AE<span>THER</span></div>
+    <p>Open protocol · MIT licensed · <a href="https://github.com/aether-protocol/aether">github.com/aether-protocol/aether</a></p>
+  </div>
+</footer>
+</body>
+</html>

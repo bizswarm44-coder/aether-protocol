@@ -13,7 +13,12 @@ We walk the full protocol:
 Run it:  python -m examples.research_flow      (from the repo root)
 """
 
+import os
+import sys
 import time
+
+# Allow running directly (python examples/research_flow.py) or via -m.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from aether import (
     crypto,

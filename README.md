@@ -224,15 +224,69 @@ All messages provide `.to_dict()` / `.from_dict()` for JSON transport.
 
 ---
 
-## Running the example & tests
+## Discovery Registry
+
+Peer-to-peer handshakes assume agents already know each other. The **Discovery
+Registry** removes that assumption: providers publish their signed manifests, and
+any agent can query for capable, trustworthy counterparties across stacks. The
+registry verifies every manifest's signature before storing it, keeps only the
+newest manifest per agent, and never returns one whose signature no longer holds.
+
+### Run the registry server
+
+```bash
+# standard-library only — no extra dependencies
+python -m registry.server                    # binds 0.0.0.0:8080
+AETHER_REGISTRY_PORT=9000 python -m registry.server
+```
+
+| Method & path              | Purpose                                            |
+| -------------------------- | -------------------------------------------------- |
+| `POST /publish`            | Publish a signed manifest (rejected if invalid)    |
+| `GET /discover`            | `?task_type=&max_price=&min_reputation=`           |
+| `GET /agents/{agent_id}`   | Fetch one agent's manifest                          |
+| `DELETE /agents/{agent_id}`| Remove your manifest (requires a signed proof)     |
+| `GET /stats`               | Network stats (agent count, task types, avg rep)   |
+| `GET /healthz`             | Liveness probe                                      |
+
+### Use the client (standard library, zero extra deps)
+
+```python
+from aether import crypto, CapabilityManifest, PriceSchedule, RegistryClient
+
+priv, pub = crypto.generate_keypair()
+manifest = CapabilityManifest(
+    pub, "Vega Research", ["market_research"],
+    pricing=[PriceSchedule("market_research", 4.0)], reputation=0.92,
+).sign(priv)
+
+reg = RegistryClient("http://localhost:8080")
+reg.publish(manifest)
+providers = reg.discover("market_research", max_price=5.0, min_reputation=0.6)
+# providers are returned best-first (reputation desc, then price asc)
+```
+
+`ManifestStore` (in `aether.registry_store`) is the transport-agnostic core
+behind the server — unit-testable directly and swappable to a real database
+later without touching the HTTP layer.
+
+---
+
+## Running the examples & tests
 
 ```bash
 # full narrated demo of all three settlement models
 python -m examples.research_flow
 
-# test suite
-python -m pytest tests/ -q      # or: python tests/test_protocol.py
+# end-to-end registry demo (spins up an in-process registry automatically)
+python examples/registry_flow.py
+
+# test suite (protocol + registry)
+python -m pytest tests/ -q
 ```
+
+See **[LAUNCH.md](LAUNCH.md)** for the go-to-market and adoption playbook, and
+**[site/index.html](site/index.html)** for the landing page.
 
 ---
 

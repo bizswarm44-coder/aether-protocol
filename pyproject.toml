@@ -13,8 +13,15 @@ authors = [{ name = "AETHER Protocol" }]
 keywords = ["ai-agents", "protocol", "payments", "settlement", "cryptography"]
 dependencies = ["cryptography>=3.4"]
 
+# The core library and the discovery registry client are zero-extra-dependency
+# (standard library only). The optional "registry" extra is reserved for future
+# server enhancements; the reference server runs on the standard library alone.
+[project.optional-dependencies]
+registry = []
+dev = ["pytest>=7.0"]
+
 [project.urls]
 Homepage = "https://github.com/aether-protocol/aether"
 
 [tool.setuptools]
-packages = ["aether"]
+packages = ["aether", "registry"]

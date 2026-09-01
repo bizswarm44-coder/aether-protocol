@@ -6,11 +6,11 @@
 > discover, negotiate with, and *pay* any other agent, using signed messages and
 > zero shared infrastructure.
 
-[![status](https://img.shields.io/badge/status-v1.0-brightgreen)](https://github.com/bizswarm44-coder/Internet-takeover)
+[![version](https://img.shields.io/badge/version-0.2-brightgreen)](https://github.com/bizswarm44-coder/aether-protocol)
 [![license](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 [![python](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/)
 [![deps](https://img.shields.io/badge/core%20deps-cryptography%20only-orange)](./pyproject.toml)
-[![tests](https://img.shields.io/badge/tests-23%20passing-brightgreen)](./tests)
+[![tests](https://img.shields.io/badge/tests-44%20passing-brightgreen)](./tests)
 
 A lightweight, open, cryptographically-signed protocol that lets autonomous AI
 agents **discover each other, negotiate work, exchange tasks, and settle payment** —
@@ -42,8 +42,60 @@ print(reg.stats())
 
 ---
 
+## What's new in v0.2
+
+v0.2 adds two backward-compatible extensions on top of the v0.1 core. Both are
+opt-in: existing v0.1 flows behave exactly as before. Full details in
+**[SPEC_v0.2.md](SPEC_v0.2.md)**.
+
+### 1. Escrow dispute resolution
+
+Escrow settlement gains an explicit state machine and a way to resolve
+disagreements without a trusted middleman baked into the protocol:
+
+- **`DisputeClaim` / `DisputeResolution`** (`aether.dispute`) — signed message
+  types. A claim states the reason (`non_delivery`, `quality`, …), a SHA-256
+  `evidence_hash` of off-protocol evidence, and a `requested_outcome`. A
+  resolution carries the arbiter's `verdict` and an optional `split_bps` for
+  partial splits.
+- **Pluggable arbiter, agreed up front.** The `SettlementOffer` now carries an
+  `arbiter` (public key) and `dispute_window_secs`, both included in the signed
+  offer — so *both* parties cryptographically commit to who may arbitrate and
+  for how long *before* any work starts. An empty `arbiter` means "no
+  arbitration" and preserves v0.1 behavior exactly.
+- **Escrow state machine.** `EscrowSettlement` tracks each escrow through
+  `LOCKED → DELIVERED → (DISPUTED → RESOLVED) → RELEASED/REFUNDED`. Funds are
+  frozen while `DISPUTED` (`settle()` refuses to release them), and only the
+  arbiter named in the original offer can sign a valid `DisputeResolution` —
+  anyone else is rejected with a `PermissionError`.
+
+### 2. Registry federation
+
+Registries can now mirror each other so discovery spans multiple independent
+hosts, with no shared database and no trusted coordinator:
+
+- **Trustless gossip mirroring.** Each registry periodically pulls
+  `/peer/manifests?since=<ts>` from its configured peers and re-verifies **every
+  manifest's self-signature** before storing it. Because manifests are
+  self-signed by the agent, a relaying registry cannot forge or tamper with
+  them; a bad peer can at most withhold data, not fabricate it. Future-dated
+  manifests (beyond a configurable clock-skew allowance) are rejected, and
+  conflicts resolve last-writer-wins by `issued_at`.
+- **New peer endpoints.** `GET /peer/info` (registry id + peer list) and
+  `GET /peer/manifests?since=<ts>` (incremental pull) are live on every
+  registry.
+- **Multi-registry discovery.** `RegistryClient` now accepts a list of registry
+  URLs; `discover()` queries all of them, merges and dedupes by `agent_id`
+  (keeping the newest), and tolerates unreachable registries. A single-URL
+  client behaves exactly as in v0.1.
+
+See the runnable demo in **[examples/federation_flow.py](examples/federation_flow.py)**.
+
+---
+
 ## Table of contents
 
+- [What's new in v0.2](#whats-new-in-v02)
 - [Protocol overview](#protocol-overview)
 - [Install](#install)
 - [Quick start](#quick-start)
@@ -334,7 +386,10 @@ python -m examples.research_flow
 # end-to-end registry demo (spins up an in-process registry automatically)
 python examples/registry_flow.py
 
-# test suite (protocol + registry) — 23 tests
+# v0.2: registry federation demo (two in-process registries mirror each other)
+python examples/federation_flow.py
+
+# test suite (protocol + dispute resolution + federation) — 44 tests
 python -m pytest tests/ -q
 ```
 

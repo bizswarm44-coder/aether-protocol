@@ -34,6 +34,11 @@ class ManifestStore:
 
     def __init__(self, persist_path: Optional[str] = None) -> None:
         self._manifests: Dict[str, CapabilityManifest] = {}
+        # Origin tag: which peer a manifest was mirrored from (or None/"local"
+        # for locally published ones). Used ONLY for debugging and federation
+        # loop-prevention — never consulted for authenticity, which rests
+        # entirely on the manifest's own Ed25519 signature.
+        self._origins: Dict[str, Optional[str]] = {}
         self._persist_path = persist_path
         self._lock = threading.RLock()
         if persist_path and os.path.exists(persist_path):
@@ -47,27 +52,49 @@ class ManifestStore:
                 data = json.load(fh)
         except (OSError, ValueError):
             return
+        origins = data.get("origins", {})
         for raw in data.get("manifests", []):
             manifest = CapabilityManifest.from_dict(raw)
             if manifest.verify():
                 self._manifests[manifest.agent_id] = manifest
+                self._origins[manifest.agent_id] = origins.get(manifest.agent_id)
 
     def _save(self) -> None:
         if not self._persist_path:
             return
         tmp = f"{self._persist_path}.tmp"
-        payload = {"manifests": [m.to_dict() for m in self._manifests.values()]}
+        payload = {
+            "manifests": [m.to_dict() for m in self._manifests.values()],
+            # Origins persisted additively; older files without this key load
+            # fine (they default to None origin).
+            "origins": dict(self._origins),
+        }
         with open(tmp, "w", encoding="utf-8") as fh:
             json.dump(payload, fh, indent=2)
         os.replace(tmp, self._persist_path)  # atomic swap
 
     # -- writes ------------------------------------------------------------
 
-    def publish(self, manifest: CapabilityManifest) -> CapabilityManifest:
-        """Store a manifest after verifying its signature.
+    def publish(
+        self,
+        manifest: CapabilityManifest,
+        origin: Optional[str] = None,
+    ) -> CapabilityManifest:
+        """Store a manifest after verifying its signature (last-writer-wins).
 
-        Raises ``ValueError`` on an invalid signature. If an existing manifest
-        for the same agent is newer, it is kept and returned unchanged.
+        Authenticity is enforced by verifying the manifest's own signature.
+        Conflicts between manifests for the same ``agent_id`` are resolved by
+        **last-writer-wins on the signed ``issued_at``** — a field the agent
+        itself controls and signs, so a hostile registry cannot resurrect a
+        stale manifest by re-serving it. A strictly newer ``issued_at``
+        replaces an older one; an older or equal one is ignored.
+
+        ``origin`` records which peer this manifest was mirrored from (or None
+        for a local publish). It is stored for debugging/loop-prevention only
+        and never affects the accept/reject decision.
+
+        Raises ``ValueError`` on an invalid signature. Returns the manifest now
+        on file for this agent (either the incoming one or the retained newer).
         """
         if not manifest.verify():
             raise ValueError("manifest signature is invalid")
@@ -76,6 +103,7 @@ class ManifestStore:
             if existing and existing.issued_at >= manifest.issued_at:
                 return existing  # newer/equal manifest already on file
             self._manifests[manifest.agent_id] = manifest
+            self._origins[manifest.agent_id] = origin
             self._save()
             return manifest
 
@@ -84,14 +112,41 @@ class ManifestStore:
         with self._lock:
             existed = self._manifests.pop(agent_id, None) is not None
             if existed:
+                self._origins.pop(agent_id, None)
                 self._save()
             return existed
+
+    def origin_of(self, agent_id: str) -> Optional[str]:
+        """Return the peer a manifest was mirrored from (debug/loop-prevention).
+
+        Never use this for trust decisions — authenticity comes from the
+        manifest signature alone.
+        """
+        with self._lock:
+            return self._origins.get(agent_id)
 
     # -- reads -------------------------------------------------------------
 
     def get(self, agent_id: str) -> Optional[CapabilityManifest]:
         with self._lock:
             return self._manifests.get(agent_id)
+
+    def updated_since(self, ts: float) -> List[CapabilityManifest]:
+        """Return signature-valid manifests with ``issued_at >= ts``.
+
+        This is the pull primitive for federation: a peer asks for everything
+        that changed since it last synced. Ordered by ``issued_at`` ascending so
+        pullers can advance their cursor deterministically. The filter is on the
+        signed ``issued_at`` (not a server receive-time), keeping the result
+        independent of which registry is answering.
+        """
+        with self._lock:
+            candidates = list(self._manifests.values())
+        fresh = [
+            m for m in candidates if m.issued_at >= ts and m.verify()
+        ]
+        fresh.sort(key=lambda m: m.issued_at)
+        return fresh
 
     def discover(
         self,

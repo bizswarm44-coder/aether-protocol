@@ -6,3 +6,6 @@ dist/
 .pytest_cache/
 .venv/
 registry_data.json
+
+# seed identities (never commit private keys)
+examples/.seed_keys.json

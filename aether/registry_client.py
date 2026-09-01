@@ -48,6 +48,10 @@ class RegistryClient:
         url = f"{self.base_url}{path}"
         data = json.dumps(body).encode("utf-8") if body is not None else None
         req = urllib.request.Request(url, data=data, method=method)
+        # A named User-Agent identifies AETHER traffic and, importantly, avoids
+        # the default "Python-urllib/x.y" signature that many CDNs/WAFs block
+        # outright — so this client works against CDN-fronted registries too.
+        req.add_header("User-Agent", "aether-registry-client/1.0")
         if data is not None:
             req.add_header("Content-Type", "application/json")
         try:

@@ -33,6 +33,13 @@ from .settlement import (
     EscrowSettlement,
     PhasedSettlement,
 )
+from .dispute import (
+    DisputeClaim,
+    DisputeResolution,
+    Arbiter,
+    evidence_hash,
+    rationale_hash,
+)
 from .registry_store import ManifestStore
 from .registry_client import RegistryClient, RegistryError
 
@@ -56,6 +63,11 @@ __all__ = [
     "ImmediatePayment",
     "EscrowSettlement",
     "PhasedSettlement",
+    "DisputeClaim",
+    "DisputeResolution",
+    "Arbiter",
+    "evidence_hash",
+    "rationale_hash",
     "ManifestStore",
     "RegistryClient",
     "RegistryError",

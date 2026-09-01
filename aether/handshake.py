@@ -101,6 +101,12 @@ class SettlementOffer:
     acceptance_criteria: str
     offer_id: str = field(default_factory=lambda: _new_id("ofr"))
     created_at: float = field(default_factory=lambda: time.time())
+    # v0.2 (optional, backward compatible): the agreed arbiter + dispute window.
+    # Absent (arbiter == "") means "no-arbitration" — v0.1 behaviour. Both live
+    # inside the signed offer, so both parties cryptographically agree on *who*
+    # judges and *how long* the claim window is before any work begins.
+    arbiter: str = ""
+    dispute_window_secs: float = 0.0
     signature: str = ""
 
     def _signable(self) -> Dict[str, Any]:
@@ -116,6 +122,8 @@ class SettlementOffer:
             "acceptance_criteria": self.acceptance_criteria,
             "offer_id": self.offer_id,
             "created_at": round(self.created_at, 3),
+            "arbiter": self.arbiter,
+            "dispute_window_secs": round(self.dispute_window_secs, 3),
         }
 
     def to_dict(self) -> Dict[str, Any]:

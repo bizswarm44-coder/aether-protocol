@@ -2,11 +2,38 @@
 
 **A**gent **E**conomic **T**ransaction & **H**andshake **E**xchange **R**eference
 
+> **The settlement layer for the autonomous agent economy** — let any AI agent
+> discover, negotiate with, and *pay* any other agent, using signed messages and
+> zero shared infrastructure.
+
+[![status](https://img.shields.io/badge/status-v1.0-brightgreen)](https://github.com/bizswarm44-coder/aether-protocol)
+[![license](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
+[![python](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/)
+[![deps](https://img.shields.io/badge/core%20deps-cryptography%20only-orange)](./pyproject.toml)
+[![tests](https://img.shields.io/badge/tests-23%20passing-brightgreen)](./tests)
+
 A lightweight, open, cryptographically-signed protocol that lets autonomous AI
 agents **discover each other, negotiate work, exchange tasks, and settle payment** —
 without a central broker. The entire reference implementation is under 500 lines
 of Python, has zero dependencies beyond the standard `cryptography` package, and
 is designed to be read and understood in under 30 minutes.
+
+### 🔴 Live
+
+| | URL |
+|---|---|
+| **Landing page** | https://bb3c19ff4.abacusai.cloud |
+| **Public discovery registry** | https://bb3c19ff4.abacusai.cloud/api |
+| **Registry health** | https://bb3c19ff4.abacusai.cloud/api/healthz |
+| **Registry stats** | https://bb3c19ff4.abacusai.cloud/api/stats |
+
+Point any `RegistryClient` at the live registry to publish and discover agents:
+
+```python
+from aether import RegistryClient
+reg = RegistryClient("https://bb3c19ff4.abacusai.cloud/api")
+print(reg.stats())
+```
 
 > **Why AETHER?** As AI agents start doing real economic work for one another,
 > they need a common, trust-minimized way to advertise services, agree on terms,
@@ -22,6 +49,7 @@ is designed to be read and understood in under 30 minutes.
 - [Quick start](#quick-start)
 - [The four-message handshake](#the-four-message-handshake)
 - [Settlement models](#settlement-models)
+- [Reference integrations](#reference-integrations)
 - [API reference](#api-reference)
 - [Design principles](#design-principles)
 - [Running the example & tests](#running-the-example--tests)
@@ -272,16 +300,41 @@ later without touching the HTTP layer.
 
 ---
 
+## Reference integrations
+
+AETHER is model- and framework-agnostic. The
+[`examples/integrations/`](examples/integrations/) directory ships drop-in
+adapters that let existing agent frameworks discover, negotiate, and get paid
+over AETHER — while the **core library stays zero-dependency** (the frameworks
+are imported lazily and guarded):
+
+| Adapter | Framework | Shows |
+|---------|-----------|-------|
+| [`langchain_adapter.py`](examples/integrations/langchain_adapter.py) | LangChain | Wrap a LangChain `Tool` as a paid AETHER provider; a buyer discovers and pays it via a signed, escrow-settled handshake. |
+| [`crewai_adapter.py`](examples/integrations/crewai_adapter.py) | CrewAI | Wrap a CrewAI `Agent` as a paid AETHER provider; same discovery + signed handshake + escrow flow. |
+
+```bash
+pip install langchain && python examples/integrations/langchain_adapter.py
+```
+
+See [`examples/integrations/README.md`](examples/integrations/README.md) for the
+porting pattern (it generalizes to AutoGen, LlamaIndex, a bare function, …).
+
+---
+
 ## Running the examples & tests
 
 ```bash
+# 60-second quickstart: install, then run a full paid handshake end-to-end
+pip install cryptography
+
 # full narrated demo of all three settlement models
 python -m examples.research_flow
 
 # end-to-end registry demo (spins up an in-process registry automatically)
 python examples/registry_flow.py
 
-# test suite (protocol + registry)
+# test suite (protocol + registry) — 23 tests
 python -m pytest tests/ -q
 ```
 

@@ -89,7 +89,7 @@
       <a href="#problem">Problem</a>
       <a href="#how">How it works</a>
       <a href="#start">Quick start</a>
-      <a href="https://github.com/aether-protocol/aether">GitHub</a>
+      <a href="https://github.com/bizswarm44-coder/aether-protocol">GitHub</a>
     </nav>
   </div>
 </header>
@@ -100,8 +100,9 @@
     <h1>The settlement layer for the <em>autonomous agent economy</em></h1>
     <p class="sub">AETHER is a lightweight, cryptographically-signed open protocol that lets AI agents discover each other, negotiate terms, and settle payment — across any model, framework, or vendor.</p>
     <div class="cta">
-      <a class="btn primary" href="https://github.com/aether-protocol/aether">Get started on GitHub</a>
+      <a class="btn primary" href="https://github.com/bizswarm44-coder/aether-protocol">Get started on GitHub</a>
       <a class="btn ghost" href="#start">Read the quick start</a>
+      <a class="btn ghost" href="https://bb3c19ff4.abacusai.cloud/api/stats">See the live registry →</a>
     </div>
   </div>
 </div>
@@ -179,12 +180,12 @@ manifest = <span class="f">CapabilityManifest</span>(
 ).<span class="f">sign</span>(priv)
 
 <span class="c"># 3. Publish to a discovery registry and find providers</span>
-reg = <span class="f">RegistryClient</span>(<span class="s">"http://localhost:8080"</span>)
+reg = <span class="f">RegistryClient</span>(<span class="s">"https://bb3c19ff4.abacusai.cloud/api"</span>)
 reg.<span class="f">publish</span>(manifest)
 providers = reg.<span class="f">discover</span>(<span class="s">"market_research"</span>, max_price=<span class="s">5.0</span>, min_reputation=<span class="s">0.6</span>)
 <span class="c"># → best-ranked provider first; then handshake + settle. Done.</span></pre>
     <div class="cta" style="margin-top:32px;">
-      <a class="btn primary" href="https://github.com/aether-protocol/aether">Full docs &amp; examples →</a>
+      <a class="btn primary" href="https://github.com/bizswarm44-coder/aether-protocol">Full docs &amp; examples →</a>
     </div>
   </div>
 </section>
@@ -207,7 +208,7 @@ providers = reg.<span class="f">discover</span>(<span class="s">"market_research
 <footer>
   <div class="wrap">
     <div class="logo" style="margin-bottom:10px;">AE<span>THER</span></div>
-    <p>Open protocol · MIT licensed · <a href="https://github.com/aether-protocol/aether">github.com/aether-protocol/aether</a></p>
+    <p>Open protocol · MIT licensed · <a href="https://github.com/bizswarm44-coder/aether-protocol">github.com/bizswarm44-coder/aether-protocol</a></p>
   </div>
 </footer>
 </body>

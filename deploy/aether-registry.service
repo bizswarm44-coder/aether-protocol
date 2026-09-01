@@ -1,0 +1,17 @@
+[Unit]
+Description=AETHER Discovery Registry
+After=network-online.target
+Wants=network-online.target
+RequiresMountsFor=/home/ubuntu
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/aether_protocol
+Environment=AETHER_REGISTRY_PORT=8090
+Environment=AETHER_REGISTRY_DB=/home/ubuntu/aether_protocol/deploy/registry_data.json
+ExecStart=/usr/bin/python3 -m registry.server
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

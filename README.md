@@ -6,7 +6,7 @@
 > discover, negotiate with, and *pay* any other agent, using signed messages and
 > zero shared infrastructure.
 
-[![status](https://img.shields.io/badge/status-v1.0-brightgreen)](https://github.com/bizswarm44-coder/aether-protocol)
+[![status](https://img.shields.io/badge/status-v1.0-brightgreen)](https://github.com/bizswarm44-coder/Internet-takeover)
 [![license](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 [![python](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/)
 [![deps](https://img.shields.io/badge/core%20deps-cryptography%20only-orange)](./pyproject.toml)

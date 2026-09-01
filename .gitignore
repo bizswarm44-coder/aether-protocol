@@ -9,3 +9,7 @@ registry_data.json
 
 # seed identities (never commit private keys)
 examples/.seed_keys.json
+
+# Launch kit generated docs
+launch/*.pdf
+launch/*.docx
